@@ -11,7 +11,6 @@
       <v-hover v-slot="{ hover }">
         <v-sheet class="mx-auto d-flex flex-column justify-center">
           <v-img
-            v-if="img.length > 0"
             class="rounded ma-5 elevation-5 image-thumb align-self-center"
             :max-width="isMobile ? '80vw' : 400"
             max-height="80vh"
@@ -19,7 +18,7 @@
             contain
             :src="img"
             v-ripple
-            @click="showPhotoInfoDialog(img)"
+            @click="showPhotoInfoDialog"
             :key="img"
           >
             <v-scale-transition>
@@ -34,7 +33,7 @@
                   fab
                   dark
                   x-small
-                  @click.stop="showPhotoInfoDialog(img)"
+                  @click.stop="showPhotoInfoDialog"
                   title="edit image"
                 >
                   <v-icon v-text="'mdi-clipboard-edit-outline'"></v-icon>
@@ -70,40 +69,45 @@ export default {
   },
   data: () => ({
     imageEditorModel: false,
-    img: "",
-    lazySrc: "",
+    isValid: true,
   }),
   computed: {
+    img() {
+      return this.$store.getters.src;
+    },
+    lazySrc() {
+      return this.$store.getters.lazySrc;
+    },
     isMobile() {
       return this.$vuetify.breakpoint.mobile;
     },
     validatorRules() {
       return [
-        (value) =>
-          !value ||
-          value.size < 2000000 ||
-          "Image size should be less than 2 MB!",
+        (value) => {
+          this.isValid = value ? value.size < 2000000 : true;
+          return (
+            !value ||
+            value.size < 2000000 ||
+            "Image size should be less than 2 MB!"
+          );
+        },
       ];
     },
   },
-  mounted() {
-    this.lazySrc = require(`../assets/lazy.jpg`);
-    this.img = require(`../assets/default-1920x1080.jpg`);
-  },
+  mounted() {},
   methods: {
     showPhotoInfoDialog() {
-      this.imageEditorModel = true;
-    },
-    editImage() {},
-    fileInputChangeHandler(file) {
-      if (file) {
-        this.img = URL.createObjectURL(file);
-      } else {
-        this.img = require(`../assets/default-1920x1080.jpg`);
+      if (this.isValid) {
+        this.imageEditorModel = true;
       }
     },
+    fileInputChangeHandler(file) {
+      file
+        ? this.$store.commit("set_src", URL.createObjectURL(file))
+        : this.$store.commit("reset_src");
+    },
     imageEditorUpdateImage(val) {
-      this.img = val;
+      this.$store.commit("set_src", val);
     },
   },
 };
