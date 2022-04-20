@@ -1,110 +1,108 @@
 <template>
-  <div>
-    <!-- <div>{{canvaMode}} / {{color}}</div> -->
-    <v-toolbar dense extended extension-height="54" align-center>
-      <v-slide-group
-        :value="canvaMode"
-        @change="$emit('change-mode', $event)"
-        show-arrows
-        mandatory
+  <v-toolbar dense extended extension-height="54" align-center>
+    <v-slide-group
+      :value="canvaMode"
+      @change="$emit('change-mode', $event)"
+      show-arrows
+      mandatory
+    >
+      <v-slide-item>
+        <v-btn text tile @click="showImageSetting = true">
+          <v-icon v-text="'mdi mdi-image'"></v-icon>
+        </v-btn>
+      </v-slide-item>
+      <v-slide-item
+        v-for="mode in canva_modesArr"
+        :key="mode.mode"
+        :value="mode.mode"
+        v-slot="{ active, toggle }"
       >
-        <v-slide-item>
-          <v-btn text tile @click="showImageSetting = true">
-            <v-icon v-text="'mdi mdi-image'"></v-icon>
-          </v-btn>
-        </v-slide-item>
-        <v-slide-item
-          v-for="mode in canva_modesArr"
-          :key="mode.mode"
-          :value="mode.mode"
-          v-slot="{ active, toggle }"
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              :class="active ? 'primary' : ''"
+              class="ml-2"
+              text
+              tile
+              @click="toggle"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon v-text="mode.icon"></v-icon>
+            </v-btn>
+          </template>
+          <span v-text="mode.title"></span>
+        </v-tooltip>
+      </v-slide-item>
+      <v-slide-item>
+        <v-menu
+          offset-y
+          :close-on-content-click="false"
+          :nudge-width="200"
+          left
+          :value="colorPaletteIsShown"
         >
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                :class="active ? 'primary' : ''"
-                class="ml-2"
-                text
-                tile
-                @click="toggle"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <v-icon v-text="mode.icon"></v-icon>
-              </v-btn>
-            </template>
-            <span v-text="mode.title"></span>
-          </v-tooltip>
-        </v-slide-item>
-        <v-slide-item>
-          <v-menu
-            offset-y
-            :close-on-content-click="false"
-            :nudge-width="200"
-            left
-            :value="colorPaletteIsShown"
-          >
-            <template v-slot:activator="menu">
-              <v-tooltip bottom>
-                <template v-slot:activator="tooltip">
-                  <v-btn
-                    class="ml-2"
-                    text
-                    tile
-                    v-bind="{ ...menu.attrs, ...tooltip.attrs }"
-                    v-on="{ ...menu.on, ...tooltip.on }"
-                    @click="colorPaletteIsShown = !colorPaletteIsShown"
-                  >
-                    <v-icon v-text="'mdi mdi-palette'"></v-icon>
-                  </v-btn>
-                </template>
-                <span v-text="'Colors'"></span>
-              </v-tooltip>
-            </template>
-            <v-card>
-              <v-color-picker
-                :value="color"
-                dot-size="30"
-                mode="hexa"
-                show-swatches
-                swatches-max-height="250"
-                @input="changeColor"
-              >
-              </v-color-picker>
-              <v-card-actions>
-                <v-spacer></v-spacer>
+          <template v-slot:activator="menu">
+            <v-tooltip bottom>
+              <template v-slot:activator="tooltip">
                 <v-btn
-                  small
-                  icon
-                  color="success"
-                  @click="colorPaletteIsShown = false"
+                  class="ml-2"
+                  text
+                  tile
+                  v-bind="{ ...menu.attrs, ...tooltip.attrs }"
+                  v-on="{ ...menu.on, ...tooltip.on }"
+                  @click="colorPaletteIsShown = !colorPaletteIsShown"
                 >
-                  <v-icon v-text="'mdi-check'"></v-icon>
+                  <v-icon v-text="'mdi mdi-palette'"></v-icon>
                 </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-menu>
-        </v-slide-item>
-
-        <v-slide-item>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
+              </template>
+              <span v-text="'Colors'"></span>
+            </v-tooltip>
+          </template>
+          <v-card>
+            <v-color-picker
+              :value="color"
+              dot-size="30"
+              mode="hexa"
+              show-swatches
+              swatches-max-height="250"
+              @input="changeColor"
+            >
+            </v-color-picker>
+            <v-card-actions>
+              <v-spacer></v-spacer>
               <v-btn
-                class="ml-2"
-                text
-                tile
-                @click="resetCanva"
-                :disabled="!isHistory"
-                v-bind="attrs"
-                v-on="on"
+                small
+                icon
+                color="success"
+                @click="colorPaletteIsShown = false"
               >
-                <v-icon v-text="'mdi mdi-layers-remove'"></v-icon>
+                <v-icon v-text="'mdi-check'"></v-icon>
               </v-btn>
-            </template>
-            <span v-text="'Clear All'"></span>
-          </v-tooltip>
-        </v-slide-item>
-        <!-- <v-slide-item>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
+      </v-slide-item>
+
+      <v-slide-item>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              class="ml-2"
+              text
+              tile
+              @click="resetCanva"
+              :disabled="!isHistory"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon v-text="'mdi mdi-layers-remove'"></v-icon>
+            </v-btn>
+          </template>
+          <span v-text="'Clear All'"></span>
+        </v-tooltip>
+      </v-slide-item>
+      <!-- <v-slide-item>
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
@@ -122,106 +120,105 @@
             <span v-text="'Undo'"></span>
           </v-tooltip>
         </v-slide-item> -->
-      </v-slide-group>
-      <template v-slot:extension>
-        <div
-          class="d-flex align-center flex-wrap flex-grow-1 px-2"
-          style="margin: -16px; border-top: #bdbdbd 1px solid; height: 100%"
-        >
-          <template v-if="showImageSetting">
-            <v-btn
-              text
-              tile
-              dense
-              @click="$emit('rotate', -90)"
-              title="rotate left"
-              :disabled="!isImage"
-            >
-              <v-icon v-text="'mdi mdi-rotate-left'"></v-icon>
+    </v-slide-group>
+    <template v-slot:extension>
+      <div
+        class="d-flex align-center flex-wrap flex-grow-1 px-2"
+        style="margin: -16px; border-top: #bdbdbd 1px solid; height: 100%"
+      >
+        <template v-if="showImageSetting">
+          <v-btn
+            text
+            tile
+            dense
+            @click="$emit('rotate', -90)"
+            title="rotate left"
+            :disabled="!isImage"
+          >
+            <v-icon v-text="'mdi mdi-rotate-left'"></v-icon>
+          </v-btn>
+          <v-btn
+            text
+            tile
+            @click="$emit('rotate', 90)"
+            title="rotate right"
+            :disabled="!isImage"
+          >
+            <v-icon v-text="'mdi mdi mdi-rotate-right'"></v-icon>
+          </v-btn>
+        </template>
+        <template v-if="canvaMode == 'brush'">
+          <v-select-stroke
+            v-model="figuresPreSettings.brush.strokeWidth"
+            :items="strokeWidth"
+            :stroke-color="color"
+            :strokeCircle="true"
+          ></v-select-stroke>
+        </template>
+        <template v-else-if="canvaMode == 'vector'">
+          <v-select-stroke
+            v-model="figuresPreSettings.vector.strokeWidth"
+            :items="strokeWidth"
+            :stroke-color="color"
+          ></v-select-stroke>
+        </template>
+        <template v-else-if="canvaMode == 'arrow'">
+          <v-select-stroke
+            v-model="figuresPreSettings.arrow.strokeWidth"
+            :items="strokeWidth"
+            :stroke-color="color"
+          ></v-select-stroke>
+        </template>
+        <template v-else-if="canvaMode == 'rect'">
+          <v-btn-toggle v-model="figuresPreSettings.rect.filled" dense>
+            <v-btn text tile :value="true">
+              <v-icon v-text="'mdi-rectangle'"></v-icon>
             </v-btn>
-            <v-btn
-              text
-              tile
-              @click="$emit('rotate', 90)"
-              title="rotate right"
-              :disabled="!isImage"
-            >
-              <v-icon v-text="'mdi mdi mdi-rotate-right'"></v-icon>
+            <v-btn text tile :value="false">
+              <v-icon v-text="'mdi-rectangle-outline'"></v-icon>
             </v-btn>
-          </template>
-          <template v-if="canvaMode == 'brush'">
-            <v-select-stroke
-              v-model="figuresPreSettings.brush.strokeWidth"
-              :items="strokeWidth"
-              :stroke-color="color"
-              :strokeCircle="true"
-            ></v-select-stroke>
-          </template>
-          <template v-else-if="canvaMode == 'vector'">
-            <v-select-stroke
-              v-model="figuresPreSettings.vector.strokeWidth"
-              :items="strokeWidth"
-              :stroke-color="color"
-            ></v-select-stroke>
-          </template>
-          <template v-else-if="canvaMode == 'arrow'">
-            <v-select-stroke
-              v-model="figuresPreSettings.arrow.strokeWidth"
-              :items="strokeWidth"
-              :stroke-color="color"
-            ></v-select-stroke>
-          </template>
-          <template v-else-if="canvaMode == 'rect'">
-            <v-btn-toggle v-model="figuresPreSettings.rect.filled" dense>
-              <v-btn text tile :value="true">
-                <v-icon v-text="'mdi-rectangle'"></v-icon>
-              </v-btn>
-              <v-btn text tile :value="false">
-                <v-icon v-text="'mdi-rectangle-outline'"></v-icon>
-              </v-btn>
-            </v-btn-toggle>
-            <v-select-stroke
-              v-model="figuresPreSettings.rect.strokeWidth"
-              :items="strokeWidth"
-              :stroke-color="color"
-            ></v-select-stroke>
-          </template>
-          <template v-else-if="canvaMode == 'circle'">
-            <v-btn-toggle v-model="figuresPreSettings.circle.filled" dense>
-              <v-btn text tile :value="true">
-                <v-icon v-text="'mdi-circle'"></v-icon>
-              </v-btn>
-              <v-btn text tile :value="false">
-                <v-icon v-text="'mdi-circle-outline'"></v-icon>
-              </v-btn>
-            </v-btn-toggle>
-            <v-select-stroke
-              v-model="figuresPreSettings.rect.strokeWidth"
-              :items="strokeWidth"
-              :stroke-color="color"
-            ></v-select-stroke>
-          </template>
-          <template v-else-if="canvaMode == 'text'">
-            <v-btn-toggle
-              v-model="figuresPreSettings.text.textStyle"
-              dense
-              multiple
-            >
-              <v-btn value="bold">
-                <v-icon>mdi-format-bold</v-icon>
-              </v-btn>
-              <v-btn value="italic">
-                <v-icon>mdi-format-italic</v-icon>
-              </v-btn>
-              <v-btn value="underline">
-                <v-icon>mdi-format-underline</v-icon>
-              </v-btn>
-            </v-btn-toggle>
-          </template>
-        </div>
-      </template>
-    </v-toolbar>
-  </div>
+          </v-btn-toggle>
+          <v-select-stroke
+            v-model="figuresPreSettings.rect.strokeWidth"
+            :items="strokeWidth"
+            :stroke-color="color"
+          ></v-select-stroke>
+        </template>
+        <template v-else-if="canvaMode == 'circle'">
+          <v-btn-toggle v-model="figuresPreSettings.circle.filled" dense>
+            <v-btn text tile :value="true">
+              <v-icon v-text="'mdi-circle'"></v-icon>
+            </v-btn>
+            <v-btn text tile :value="false">
+              <v-icon v-text="'mdi-circle-outline'"></v-icon>
+            </v-btn>
+          </v-btn-toggle>
+          <v-select-stroke
+            v-model="figuresPreSettings.rect.strokeWidth"
+            :items="strokeWidth"
+            :stroke-color="color"
+          ></v-select-stroke>
+        </template>
+        <template v-else-if="canvaMode == 'text'">
+          <v-btn-toggle
+            v-model="figuresPreSettings.text.textStyle"
+            dense
+            multiple
+          >
+            <v-btn value="bold">
+              <v-icon>mdi-format-bold</v-icon>
+            </v-btn>
+            <v-btn value="italic">
+              <v-icon>mdi-format-italic</v-icon>
+            </v-btn>
+            <v-btn value="underline">
+              <v-icon>mdi-format-underline</v-icon>
+            </v-btn>
+          </v-btn-toggle>
+        </template>
+      </div>
+    </template>
+  </v-toolbar>
 </template>
 <script>
 import vSelectStroke from "./selectStrockWidth.vue";
